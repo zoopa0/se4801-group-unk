@@ -1,6 +1,6 @@
 # Secrets — never commit
 .env
-
+.env.example
 # Maven build output
 target/
 *.class
