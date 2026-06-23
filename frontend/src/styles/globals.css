@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 248 250 252;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --primary: 67 56 202;
+    --primary-foreground: 255 255 255;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --border: 203 213 225;
+    --ring: 67 56 202;
+    --radius: 24px;
+  }
+
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+    --primary: 99 102 241;
+    --primary-foreground: 255 255 255;
+    --muted: 30 41 59;
+    --muted-foreground: 148 163 184;
+    --border: 51 65 85;
+    --ring: 99 102 241;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-surface-light dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-500;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-700/30;
+  }
+
+  .glass-card {
+    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-card;
+  }
+
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(135deg, rgba(67,56,202,0.1), rgba(6,182,212,0.1));
+    border-radius: 24px;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 1px;
+    background: linear-gradient(135deg, #4338CA, #06B6D4);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(67,56,202,0.15), 0 0 60px rgba(6,182,212,0.1);
+    transform: translateY(-2px);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-500 to-accent-cyan;
+  }
+}
