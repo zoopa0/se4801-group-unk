@@ -15,7 +15,8 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Non-root user for security
-RUN addgroup -S eduflow && adduser -S eduflow -G eduflow
+RUN addgroup -S eduflow && adduser -S eduflow -G eduflow \
+    && apk add --no-cache curl
 USER eduflow
 
 COPY --from=builder /build/target/eduflow-*.jar app.jar

@@ -1,20 +1,18 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
     container_name: eduflow-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-eduflow}
+      POSTGRES_USER: ${POSTGRES_USER:-eduflow_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eduflow_dev_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - eduflow-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eduflow_user} -d ${POSTGRES_DB:-eduflow}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,12 +28,32 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASS: ${POSTGRES_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-eduflow}
+      DB_USER: ${POSTGRES_USER:-eduflow_user}
+      DB_PASS: ${POSTGRES_PASSWORD:-eduflow_dev_password}
+      JWT_SECRET: ${JWT_SECRET:-change_this_secret_key_in_production_min_32_chars}
     depends_on:
       db:
+        condition: service_healthy
+    networks:
+      - eduflow-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: eduflow-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      app:
         condition: service_healthy
     networks:
       - eduflow-net

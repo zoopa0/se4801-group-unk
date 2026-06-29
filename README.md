@@ -4,6 +4,28 @@ EduFlow Enterprise is an enterprise-grade student productivity and course manage
 
 ---
 
+## Quick Start (for reviewers)
+
+Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+
+```bash
+git clone <your-repo-url>
+cd se4801-group-unk-main
+docker compose up --build
+```
+
+Then open:
+
+- **Frontend (UI):** http://localhost:3000
+- **Backend API:** http://localhost:8080
+- **Health check:** http://localhost:8080/actuator/health
+
+No `.env` file is required — Docker Compose uses safe defaults. To override database or JWT settings, copy `.env.example` to `.env` before starting.
+
+To stop everything: `docker compose down`
+
+---
+
 ## 🔒 OWASP Risk Mitigation Strategy
 
 EduFlow's API is designed in strict compliance with standard API security guidelines to mitigate common OWASP vulnerability risks:
@@ -83,17 +105,23 @@ The `ADMIN` role is the primary administrative account within EduFlow. It has sp
 
 ## 🐳 Deployment Architecture
 
-EduFlow is deployed locally and in production using Docker Compose. The environment consists of two main services isolated on a private bridge network:
+EduFlow is deployed locally and in production using Docker Compose. The environment consists of three services isolated on a private bridge network:
 
 ```
-[ Browser / API Client ]
+[ Browser ]
+     │
+     ▼  (Port 3000)
+┌────────────────────────────────┐
+│   React Frontend (nginx)       │  (Service: 'frontend')
+│   Proxies /api → backend       │
+└────────┬───────────────────────┘
          │
-         ▼  (Port 8080)
+         ▼  (Port 8080, internal network)
 ┌────────────────────────────────┐
 │   Spring Boot App Container    │  (Service: 'app')
 └────────┬───────────────────────┘
          │
-         ▼  (Port 5432, Internal Network Only)
+         ▼  (Port 5432, internal network only)
 ┌────────────────────────────────┐
 │      PostgreSQL Database       │  (Service: 'db')
 └────────────────────────────────┘
@@ -103,8 +131,9 @@ EduFlow is deployed locally and in production using Docker Compose. The environm
 
 | Service Name | Container Image | Port Mapping | Key Environment Variables |
 | :--- | :--- | :--- | :--- |
+| **frontend** | Built from `./frontend/Dockerfile` | `3000:80` (host:container) | Uses nginx to serve the React app and proxy API calls |
 | **app** | Built from `./Dockerfile` | `8080:8080` (host:container) | `SPRING_PROFILES_ACTIVE=prod`, `DB_URL`, `DB_USER`, `DB_PASS`, `JWT_SECRET` |
-| **db** | `postgres:15` | `5432:5432` (internal only — not exposed to host in prod) | `POSTGRES_DB=eduflow`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
+| **db** | `postgres:15` | internal only | `POSTGRES_DB=eduflow`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
 
 ### Key Startup & Orchestration Details
 * **Startup Ordering**: The `app` service utilizes `depends_on` with `condition: service_healthy` referencing the database. The `db` service runs a health check using `pg_isready`, preventing start-up race conditions.

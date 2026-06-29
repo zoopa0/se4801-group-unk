@@ -1,6 +1,6 @@
 # Secrets — never commit
 .env
-.env.example
+
 # Maven build output
 target/
 *.class
@@ -19,3 +19,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
